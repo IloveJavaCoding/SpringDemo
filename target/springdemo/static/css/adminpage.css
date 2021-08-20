@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+.table_user{
+    width:90%;
+    border:0;
+    text-align:center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 5%;
+    margin-right: 5%;
+    background-color:#cdcdcd;
+}
+
+.table_user th{
+    background-color:#66ccff;
+    color: #fff;
+}
+
+.table_user td{
+    background-color:#F6F4F0;
+    color: #000;
+}
+
+.table_user_foot .span_hight{
+    color: #66ccff;
+}
+
+.span_button{
+    background-color: #F6F4F0;
+    color: #000;
+}
+
+.span_button:hover{
+    cursor: pointer;
+    background-color: #666666;
+    color: white;
+}
+
+.span_button:active{
+    background-color: #F6F4F0;
+    color: red;
+}

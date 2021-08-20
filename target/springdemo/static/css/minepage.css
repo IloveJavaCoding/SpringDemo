@@ -1,0 +1,16 @@
+@charset "utf-8";
+
+.baseinfo{
+
+}
+
+.portrait_nickname{
+    float: right;
+}
+.detailinfo{
+
+}
+
+.detailinfo th{
+    text-align: left;
+}

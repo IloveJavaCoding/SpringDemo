@@ -1,0 +1,24 @@
+@charset "utf-8";
+
+.header{
+    box-sizing: border-box;
+    width:100%;
+    height:auto;
+    background-image: url("/SpringDemo/static/res/img/img_bg.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.header #homeTitle{
+    width: 100%;
+    display: block;
+    text-align: center;
+    font-size: 35px;
+    font-weight: bold;
+    color: white;
+    font-family: Fantasy, Serif, Georgia;
+}
+
+.file_upload{
+    margin-top: 15px;
+}
