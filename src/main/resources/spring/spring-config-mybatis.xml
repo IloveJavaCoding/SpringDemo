@@ -28,21 +28,28 @@
     <bean id="sqlSessionFactory" class="com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean">
         <!-- 配置数据源 -->
         <property name="dataSource" ref="dynamicDataSource"/>
-        <!-- 自动扫描 Xml 文件位置 -->
+        <!-- 自动扫描 mapper 文件位置 -->
         <property name="mapperLocations" value="classpath:/mapper/*.xml"/>
         <property name="configurationProperties">
             <props>
                 <prop key="dbType">${mysql.dbType}</prop>
             </props>
         </property>
-        <!-- 配置包别名 -->
-        <property name="typeAliasesPackage" value="com.virgo.com.pc.modules.**.entity"/>
+        <!-- 配置包别名 com.virgo.com.pc.modules.**.entity-->
+        <property name="typeAliasesPackage" value="com.virgo.com.pc.entity"/>
         <!-- 以上配置和传统 Mybatis 一致 -->
     </bean>
 
-    <!-- DAO接口所在包名，Spring会自动查找其下的类 mapper -->
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 mapper com.virgo.com.pc.modules.**.mapper -->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.virgo.com.pc.modules.**.mapper" />
+        <property name="basePackage" value="com.virgo.com.pc.mapper" />
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!-- 热加载 -->
+    <bean class="com.baomidou.mybatisplus.spring.MybatisMapperRefresh">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+        <constructor-arg name="mapperLocations" value="classpath:/mapper/*.xml"/>
+        <constructor-arg name="enabled" value="true"/>
     </bean>
 </beans>

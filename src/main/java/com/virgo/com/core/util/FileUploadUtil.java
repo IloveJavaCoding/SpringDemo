@@ -1,31 +1,15 @@
 package com.virgo.com.core.util;
 
 import com.virgo.com.core.manager.MinioManager;
-import org.apache.commons.lang.time.DateFormatUtils;
+import com.virgo.com.pc.entity.Miniofile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 
 public class FileUploadUtil {
     private static final String TAG = "FileUploadUtil";
-
-    public static final String[] IMAGE_EXTENSION = {"bmp", "gif", "jpg", "jpeg", "png"};
-    public static final String[] FLASH_EXTENSION = {"swf", "flv"};
-    public static final String[] OTHER_EXTENSION = {"apk"};
-    public static final String[] MEDIA_EXTENSION = {"swf", "flv", "mp4", "mp3", "wav", "wma", "3gp", "wmv", "mpeg", "mid", "avi", "mpg", "asf", "rmvb"};
-    public static final String[] DEFAULT_ALLOWED_EXTENSION = {
-            // 图片
-            "bmp", "gif", "jpg", "jpeg", "png",
-            // word excel powerpoint
-            "doc", "docx", "xls", "xlsx", "ppt", "pptx", "html", "htm", "txt",
-            // 压缩文件
-            "rar", "zip", "gz", "bz2",
-            // pdf
-            "pdf"};
-
-    private static HashMap<String, String> ContentType;
+    private static final HashMap<String, String> ContentType;
 
     static {
         ContentType = new HashMap<String, String>() {
@@ -278,38 +262,46 @@ public class FileUploadUtil {
     }
 
     /**
-     * 日期路径 即年/月/日 如2013/01/03
-     * @return
+     * 文件上传
      */
-    private static String datePath() {
-        Date now = new Date();
-        return DateFormatUtils.format(now, "yyyy/MM/dd");
-    }
+    public static synchronized Miniofile uploadFiles(MultipartFile file){
+        Miniofile minioFile = new Miniofile();
 
-    public static String extractFilename(MultipartFile file) {
-        String filename = file.getOriginalFilename();
-//        LogUtil.debug(TAG, "org name: " + filename);
-        int slashIndex = filename.indexOf("/");
-        if (slashIndex >= 0) {
-            filename = filename.substring(slashIndex + 1);
-        }
-
-        return datePath() + "/" + filename;
-    }
-
-    public static synchronized String uploadFiles(MultipartFile file){
-        String filename = extractFilename(file);
-        String contentType = ContentType.get(TextUtil.getExtensionName(filename));
+        String filename = file.getOriginalFilename();//原文件名（有后缀）
+        String pureName = TextUtil.getFileName(filename);//原纯文件名
+        String suffix = TextUtil.getFileSuffix(filename);//后缀名(无".")
+        String cryptyName =  CryptyUtil.cryptyFileName(pureName);//加密文件名
+        String saveName = TimeUtil.getStringDateNow(TimeUtil.DATE_FORMAT_YMD) + "/" + cryptyName + "." + suffix;//存储文件名
+        String contentType = ContentType.get(suffix);
 
         String url = null;
-        // TODO: 2021/8/10 加密文件名
         try {
-            url = MinioManager.uploadFile(file.getInputStream(), filename, contentType);
+            url = MinioManager.uploadFile(file.getInputStream(), saveName, contentType);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        minioFile.setSavename(saveName);//更改为服务器存储地址 //UUID.randomUUID().toString()
+        minioFile.setName(pureName);
+        minioFile.setSuffix(suffix);
+        minioFile.setType(TextUtil.getTypeFromSuffix(suffix));
+        minioFile.setUrl(url);
+        minioFile.setCreatedate(TimeUtil.getStringDateNow(TimeUtil.DATE_FORMAT_YMDHM));
+        minioFile.setSize(file.getSize());
 //        LogUtil.debug(TAG, "url: " + url);
-        return url;
+        return minioFile;
     }
 
+    /**
+     * 删除某个文件
+     * @param saveName 文件在服务器上的位置
+     * @return
+     */
+    public static synchronized boolean deleteFile(String saveName){
+        return MinioManager.deleteFile(saveName);
+    }
+
+    public static synchronized boolean downloadFile(String saveName, String savePath){
+        return MinioManager.downloadFile(saveName, savePath);
+    }
 }

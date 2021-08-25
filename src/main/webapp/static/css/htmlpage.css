@@ -425,6 +425,10 @@ class
 	padding-right: 10px;
 }
 
+.div_nav ul .li_hidden{
+	visibility: hidden;
+}
+
 .div_nav ul li a{
 	text-decoration: none;
 }

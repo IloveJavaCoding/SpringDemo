@@ -2,12 +2,12 @@ package com.virgo.com.core.manager;
 
 import com.virgo.com.core.util.LogUtil;
 import com.virgo.com.core.util.PropertiesUtil;
+import com.virgo.com.core.util.TextUtil;
 import io.minio.MinioClient;
 import io.minio.errors.*;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -27,30 +27,6 @@ public class MinioManager {
         minioPsd = p.getString("minio_psd");
         minioBucket = p.getString("minio_bucket");
         LogUtil.debug(TAG, "init attr: " + minioUrl + ", "+ minioUser + ", " +minioPsd);
-
-//        Properties properties = new Properties();
-//        String path = MinioManager.class.getClassLoader().getResource("properties/minio.properties").getPath();
-//        InputStream is = null;
-//        try {
-//            is = new FileInputStream(path);
-//            properties.load(is);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }finally {
-//            if(is!=null){
-//                try {
-//                    is.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//        minioUrl = properties.getProperty("minio_server", "http://192.168.2.151:9000");
-//        minioUser = properties.getProperty("minio_user", "virgo");
-//        minioPsd = properties.getProperty("minio_psd", "z12345678");
-//        minioBucket = properties.getProperty("minio_bucket", "media");
-//        LogUtil.debug(TAG, "init attr: " + minioUrl + ", "+ minioUser + ", " +minioPsd);
     }
 
     /**
@@ -71,6 +47,40 @@ public class MinioManager {
         }
 
         return url;
+    }
+
+    /**
+     * 从文件服务器移除某个文件
+     * @param fileName
+     * @return
+     */
+    private static boolean delete(String fileName){
+        boolean isOk = false;
+        try {
+            MinioClient client = new MinioClient(minioUrl, minioUser, minioPsd);
+            client.removeObject(minioBucket, fileName);
+            isOk = true;
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoResponseException | XmlPullParserException | InvalidEndpointException | InvalidBucketNameException | ErrorResponseException | InsufficientDataException | InternalException | InvalidPortException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return isOk;
+    }
+
+    /**
+     * 直接从minio文件服务器下载文件
+     * @param fileName
+     * @return
+     */
+    private static InputStream download(String fileName){
+        InputStream inputStream = null;
+        try {
+            MinioClient client = new MinioClient(minioUrl, minioUser, minioPsd);
+            inputStream = client.getObject(minioBucket, fileName);
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoResponseException | XmlPullParserException | InvalidEndpointException | InvalidBucketNameException | ErrorResponseException | InsufficientDataException | InternalException | InvalidPortException | IOException | InvalidArgumentException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
     }
 
     /**
@@ -102,5 +112,64 @@ public class MinioManager {
      */
     public static String uploadFile(InputStream stream, String fileName, String type){
         return upload(stream, fileName, type);
+    }
+
+    /**
+     * 删除某个文件
+     * @param saveName
+     * @return
+     */
+    public static boolean deleteFile(String saveName){
+        //从链接提取有效文件名
+        //http://192.168.2.151:9000/media/2021/08/25/bd540ce64b4dfbcb93d5c5535a152781.png
+        if(saveName.contains(minioBucket)){//若包含容器名则截断
+            String name = saveName.substring(saveName.indexOf(minioBucket)+minioBucket.length()+1);
+            LogUtil.debug(TAG, name);
+            return delete(name);
+        }
+        return delete(saveName);
+    }
+
+    /**
+     * 下载文件到本地
+     * @param saveName 文件在服务器上的位置
+     * @param savePath 存储到本地的位置
+     * @return
+     */
+    public static boolean downloadFile(String saveName, String savePath){
+        InputStream inputstream = download(saveName);
+        OutputStream outputStream = null;
+
+        if(inputstream!=null){
+            String name = TextUtil.getFileNameWithSuffix(saveName);
+            try {
+                byte[] buffer = new byte[1024];
+                int length;
+
+                outputStream = new FileOutputStream(new File(savePath+File.separator+name));
+                while ((length = inputstream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    inputstream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if(outputStream!=null) {
+                    try {
+                        outputStream.flush();
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

@@ -13,12 +13,19 @@
     <title>Admin</title>
     <link href="/SpringDemo/static/res/icon/icon_logo.ico" rel="shortcut icon"/>
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/commonstyle.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/tablelist.css"/>
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/adminpage.css"/>
     <!--支持jquery-->
-    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>
+<%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
+    <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
     <script type="text/javascript">
         var curPage = 1;//默认为第一页数据
         var allPage;
+
+        function getLoginUser() {
+            return '<%=session.getAttribute("username")%>';
+        }
+
         function loadUsers() {
             setCurPage();
             getUsers(curPage);
@@ -69,7 +76,7 @@
                         str += "<td>"+ id + "</td>";
                         str += "<td>"+ username + "</td>";
                         str += "<td>"+ password + "</td>";
-                        str += "<td><button id=" + id + " onclick='deleteUser("+id+");'>删除</button></td>";
+                        str += "<td><button id=" + id + " onclick='deleteUser("+id+")'>删除</button></td>";
                         str += "</tr>";
                     });
                     // $("#table_user_body").innerHTML  = str;
@@ -131,8 +138,10 @@
             }
         }
     </script>
+
+    <script type="text/javascript" src="/SpringDemo/static/js/commonjs.js"></script>
 </head>
-<body onload="loadUsers()">
+<body onload="onLoad(); loadUsers()">
 <div id="header" class="header">
     <a class="logo" href="/SpringDemo/static/res/icon/icon_logo2.ico"></a>
     <h1>VIRGO</h1>
@@ -144,7 +153,7 @@
         <li><a href="/SpringDemo/html">Html</a></li>
         <li><a href="/SpringDemo/source">Source</a></li>
         <li><a href="/SpringDemo/mine">Mine</a></li>
-        <li><a href="/SpringDemo/admin" class="nav_selected">Admin</a></li>
+        <li id="admin" class="li_hidden"><a href="/SpringDemo/admin" class="nav_selected">Admin</a></li>
     </ul>
 </div>
 
@@ -152,8 +161,8 @@
     <a href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
     <div class="user_list">
-        <table id="table_user" class="table_user">
-            <thead id="table_user_head" class="table_user_head">
+        <table id="table_user" class="table_data">
+            <thead id="table_user_head" class="table_data_head">
                 <tr>
                     <th>id</th>
                     <th>账号</th>
@@ -162,11 +171,11 @@
                 </tr>
             </thead>
 
-            <tbody id="table_user_body" class="table_user_body">
+            <tbody id="table_user_body" class="table_data_body">
 
             </tbody>
 
-            <tfoot id="table_user_foot" class="table_user_foot">
+            <tfoot id="table_user_foot" class="table_data_foot">
                 <tr>
                     <td colspan="4">
                         <span class="span_button" onclick="lastPage();">上一页</span>

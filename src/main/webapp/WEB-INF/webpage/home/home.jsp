@@ -22,48 +22,15 @@
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/commonstyle.css"/>
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/homepage.css"/>
     <!--支持jquery-->
-    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>
-<%--    <script type="text/javascript" src="/SpringDemo/static/js/homepage.js"></script> --%>
+<%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
+    <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
     <script type="text/javascript">
-        function onLoad(){
-            var admin = document.getElementById("admin");
-            if(!isAdmin()){
-                console.log("管理员？", "no");
-                admin.style.visibility = "hidden";
-            }else{
-                console.log("管理员？", "yes");
-            }
-        }
-
-        function isAdmin() {
-            const name = '<%=session.getAttribute("username")%>';
-            return name === "admin";
-        }
-
-        function uploadFile() {
-            var formData = new FormData();
-            formData.append("file",$("#filename")[0].files[0]);
-            $.ajax({
-                url: '/SpringDemo/home/upload',//请求url
-                type: 'post',//请求类型
-                cache: false,//
-                data: formData,//请求参数
-                dataType: "json",//返回数据类型
-                processData: false,
-                contentType: false,
-                success:function (res) {
-                    console.log(res);
-                    if(res!=null){
-                        if(res.code==="SUCCESS"){
-                            alert(res.msg+": " + res.data);
-                        }else{
-                            alert(res.msg);
-                        }
-                    }
-                }
-            })
+        function getLoginUser() {
+            return '<%=session.getAttribute("username")%>';
         }
     </script>
+
+    <script type="text/javascript" src="/SpringDemo/static/js/commonjs.js"></script>
 </head>
 <body onload="onLoad()">
     <div id="header" class="header">
@@ -79,31 +46,12 @@
             <li><a href="/SpringDemo/html">Html</a></li>
             <li><a href="/SpringDemo/source">Source</a></li>
             <li><a href="/SpringDemo/mine">Mine</a></li>
-            <li id="admin"><a href="/SpringDemo/admin">Admin</a></li>
+            <li id="admin" class="li_hidden"><a href="/SpringDemo/admin">Admin</a></li>
         </ul>
     </div>
 
     <div id="main" class="main">
         <a href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
-
-        <div class="file_upload">
-<%--            method="post" action="/SpringDemo/home/upload"--%>
-            <form id="upload_file" class="form_upload_file" enctype="multipart/form-data">
-                <input type="file" id="filename" name="filename"/>
-                <button type="button" onclick="uploadFile()">上传</button>
-            </form>
-
-            <br/>
-
-            <form id="upload_file2" class="form_upload_file" method="post" action="/SpringDemo/uploadFile" enctype="multipart/form-data">
-                <input type="file" name="file"/>
-                <input type="submit" value="上传"/>
-            </form>
-        </div>
-
-        <div class="file_list">
-
-        </div>
 
     </div>
 

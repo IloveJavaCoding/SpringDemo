@@ -80,15 +80,25 @@
     </style> -->
 
     <!-- script：加载脚本文件 js-->
+    <!--支持jquery-->
+<%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
+    <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="/SpringDemo/static/js/htmlpage.js"></script>
 
+    <script type="text/javascript">
+        function getLoginUser() {
+            return '<%=session.getAttribute("username")%>';
+        }
+    </script>
+
+    <script type="text/javascript" src="/SpringDemo/static/js/commonjs.js"></script>
     <!--不支持 JavaScript 的浏览器会使用 <noscript> 元素中定义的内容（文本）来替代-->
     <noscript>抱歉，你的浏览器不支持 JavaScript!</noscript>
 
 </head> <!-- 结束标签常称为闭合标签（closing tag）-->
 
 <!--可见页面内容-->
-<body>
+<body onload="onLoad()">
 <div class="div_header">
 <%--    onclick="window.open('')"--%>
     <h1>VIRGO.NOTE</h1>
@@ -100,6 +110,7 @@
         <li><a href="/SpringDemo/html" class="nav_selected">Html</a></li>
         <li><a href="/SpringDemo/source">Source</a></li>
         <li><a href="/SpringDemo/mine">Mine</a></li>
+        <li id="admin" class="li_hidden"><a href="/SpringDemo/admin">Admin</a></li>
 
         <!--				<li><a href="./html_home.html">首页</a></li>-->
         <!--				<li><a href="" class="nav_selected">HTML</a></li>-->

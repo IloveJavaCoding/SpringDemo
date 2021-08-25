@@ -12,16 +12,33 @@
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/login.css">
     <script type="text/javascript">
+        function record() {
+            var name = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            console.log("name: " + name + ", pass: " + password);
+            if(name==="" || password===""){
+                alert("用户名、密码不能为空！")
+                return false;
+            }
+
+            return true;
+            // if(typeof(Storage)!=="undefined") {
+            //     sessionStorage.setItem("username", name);
+            //     return true
+            // } else {
+            //     // 抱歉! 不支持 web 存储。
+            //     return false;
+            // }
+        }
     </script>
 </head>
 <body>
     <div class="header">
-
     </div>
     <div class="main">
         <div class="login_form">
             <%--使用表单提交参数：name为key, 对应标签值为value, action内指定接收位置--%>
-            <form class="form" method="post" action="/SpringDemo/account/login">
+            <form class="form" method="post" action="/SpringDemo/account/login" onsubmit="return record();">
                 <div class="login_title">
                     <span>用户登入</span>
                 </div>

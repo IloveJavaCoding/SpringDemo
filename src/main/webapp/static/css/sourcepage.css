@@ -1,0 +1,48 @@
+@charset "utf-8";
+
+.file_upload{
+    margin-top: 15px;
+}
+
+.div_file{
+    margin-top: 10px;
+    height: 200px;
+}
+
+.file_navigation{
+    background-color:#ffffff;
+    max-width:160px;
+    width:10%;
+    float:left;
+    margin-right:2%;
+}
+
+.file_navigation ul{
+    list-style-type: none;
+    margin:0;
+    padding:0;
+}
+
+.file_navigation ul li{
+    background-color: #cdcdcd;
+    color: #666666;
+    margin: 1px;
+}
+
+.file_navigation ul li:hover{
+    background-color: #66ccff;
+    color: white;
+    cursor: pointer;
+}
+
+.file_navigation ul li:active{
+    background-color: #cdcdcd;
+    color: red;
+}
+
+.file_list{
+    background-color:#EEEEEE;
+    width:86%;
+    float:left;
+    padding:1%;
+}

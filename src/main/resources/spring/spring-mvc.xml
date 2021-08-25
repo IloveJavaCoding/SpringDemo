@@ -16,8 +16,8 @@
     <!-- 加载配置属性文件: 文件上传 -->
     <context:property-placeholder ignore-unresolvable="true" location="classpath:properties/minio.properties" />
 
-    <!-- 开启controller注解支持 -->
-    <context:component-scan base-package="com.virgo.com.pc.modules.**.controller, com.virgo.com.mobile.controller">
+    <!-- 开启controller注解支持 com.virgo.com.pc.modules.**.controller-->
+    <context:component-scan base-package="com.virgo.com.pc.controller, com.virgo.com.mobile.controller">
         <context:include-filter
                 type="annotation"
                 expression="org.springframework.stereotype.Controller" />

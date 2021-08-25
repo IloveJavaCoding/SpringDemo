@@ -5,8 +5,11 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * 加密工具类
@@ -36,6 +39,50 @@ public class CryptyUtil {
             throw new RuntimeException(e);
         }
     }
+
+    //2. Md5 加密
+    private static byte[] md5(String s) {
+        MessageDigest algorithm;
+        try {
+            algorithm = MessageDigest.getInstance("MD5");
+            algorithm.reset();
+            algorithm.update(s.getBytes("UTF-8"));
+            return algorithm.digest();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static byte[] md5(byte[] s) {
+        MessageDigest algorithm;
+        try {
+            algorithm = MessageDigest.getInstance("MD5");
+            algorithm.reset();
+            algorithm.update(s);
+            return algorithm.digest();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static String toHex(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
+        int i;
+
+        for (i = 0; i < bytes.length; i++) {
+            if ((bytes[i] & 0xff) < 0x10) {
+                buf.append("0");
+            }
+            buf.append(Long.toString(bytes[i] & 0xff, 16));
+        }
+        return buf.toString();
+    }
+
 
     //////////////////////////////////////////////////////////////////
     /**
@@ -89,13 +136,29 @@ public class CryptyUtil {
         try {
             String decodeToken = decode(appkey);
             String[] arrs = decodeToken.split("\\|");
-            if(appPackageName.equals(arrs[0]) && type.equalsIgnoreCase(arrs[1])){
-                return true;
-            }
-            return false;
+            return appPackageName.equals(arrs[0]) && type.equalsIgnoreCase(arrs[1]);
         }catch (Exception e){
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * 加密保存文件名 md5
+     * @param fileName
+     * @return
+     */
+    public static String cryptyFileName(String fileName){
+        if(TextUtil.isEmpty(fileName)){
+            return fileName;
+        }
+
+        byte[] bytes = md5(fileName);
+        if(bytes!=null){
+            return new BigInteger(1, bytes).toString(16);
+        }else{
+            return UUID.randomUUID().toString();
+        }
+//        return Base64.encodeBase64String(bytes);
     }
 }
