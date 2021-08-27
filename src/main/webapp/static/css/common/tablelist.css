@@ -1,0 +1,40 @@
+@charset "utf-8";
+/**
+表格数据特有
+ */
+.table_data{
+    width:100%;
+    border:0;
+    text-align:center;
+    background-color:#cdcdcd;
+}
+
+.table_data th{
+    background-color:#66ccff;
+    color: #fff;
+}
+
+.table_data td{
+    background-color:#F6F4F0;
+    color: #000;
+}
+
+.table_data_foot .span_hight{
+    color: #66ccff;
+}
+
+.span_button{
+    background-color: #F6F4F0;
+    color: #000;
+}
+
+.span_button:hover{
+    cursor: pointer;
+    background-color: #666666;
+    color: white;
+}
+
+.span_button:active{
+    background-color: #F6F4F0;
+    color: red;
+}

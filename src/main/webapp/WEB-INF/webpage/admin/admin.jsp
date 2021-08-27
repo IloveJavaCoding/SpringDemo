@@ -12,9 +12,9 @@
     <meta charset="UTF-8">
     <title>Admin</title>
     <link href="/SpringDemo/static/res/icon/icon_logo.ico" rel="shortcut icon"/>
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/commonstyle.css"/>
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/tablelist.css"/>
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/adminpage.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/common/commonstyle.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/common/tablelist.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/page/adminpage.css"/>
     <!--支持jquery-->
 <%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
     <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
@@ -139,7 +139,7 @@
         }
     </script>
 
-    <script type="text/javascript" src="/SpringDemo/static/js/commonjs.js"></script>
+    <script type="text/javascript" src="/SpringDemo/static/js/common/commonjs.js"></script>
 </head>
 <body onload="onLoad(); loadUsers()">
 <div id="header" class="header">
@@ -158,7 +158,7 @@
 </div>
 
 <div id="main" class="main">
-    <a href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
+    <a id="go_top" href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
     <div class="user_list">
         <table id="table_user" class="table_data">

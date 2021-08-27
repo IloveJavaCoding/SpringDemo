@@ -71,7 +71,7 @@
     <!--		<base href="F:\ZSLWORK\documents\html\"/>-->
 
     <!-- link: 定义文档与外部资源之间的关系, 通常用于链接到样式表（css）可链接多个css文件-->
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/htmlpage.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/page/htmlpage.css"/>
 
     <!-- style: 定义HTML文档的样式文件引用地址-->
     <!--<style type="text/css">
@@ -83,7 +83,7 @@
     <!--支持jquery-->
 <%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
     <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
-    <script type="text/javascript" src="/SpringDemo/static/js/htmlpage.js"></script>
+    <script type="text/javascript" src="/SpringDemo/static/js/page/htmlpage.js"></script>
 
     <script type="text/javascript">
         function getLoginUser() {
@@ -91,7 +91,7 @@
         }
     </script>
 
-    <script type="text/javascript" src="/SpringDemo/static/js/commonjs.js"></script>
+    <script type="text/javascript" src="/SpringDemo/static/js/common/commonjs.js"></script>
     <!--不支持 JavaScript 的浏览器会使用 <noscript> 元素中定义的内容（文本）来替代-->
     <noscript>抱歉，你的浏览器不支持 JavaScript!</noscript>
 
@@ -126,7 +126,7 @@
     / 	: file:///F:/
     <a href="#end" style="float:right"><img src="./res/icon_end.png" width="32" height="32"></a>
     -->
-    <a href="#main" class="div_end_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
+    <a id="go_top" href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
     <div class="div_menu">
         <ul class="ul_menu">

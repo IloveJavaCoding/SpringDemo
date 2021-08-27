@@ -34,12 +34,17 @@ public class FileController extends PcBaseControllerr {
         JSONObject jsonObject;
         LogUtil.debug(TAG, "filename: " + file.getOriginalFilename());
         try {
-            Miniofile minioFile = FileUploadUtil.uploadFiles(file);
-            fileService.insert(minioFile);
-            jsonObject = Response.success("上传成功", minioFile.getUrl());
+            Miniofile minioFile = FileUploadUtil.uploadFile(file);
+            if(minioFile!=null){
+                fileService.insert(minioFile);
+                LogUtil.debug(TAG, minioFile.toString());
+                jsonObject = Response.success("上传成功", minioFile.getUrl());
+            }else{
+                jsonObject = Response.fail("上传失败1");
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            jsonObject = Response.fail("上传失败");
+            jsonObject = Response.fail("上传失败2");
         }
 
         sendJsonResponse(response, jsonObject);

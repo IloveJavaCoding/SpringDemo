@@ -1,11 +1,17 @@
 package com.virgo.com.core.util;
 
+import com.virgo.com.core.bean.MediaInfo;
+import com.virgo.com.core.data.Constants;
 import com.virgo.com.core.manager.MinioManager;
 import com.virgo.com.pc.entity.Miniofile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class FileUploadUtil {
     private static final String TAG = "FileUploadUtil";
@@ -264,10 +270,13 @@ public class FileUploadUtil {
     /**
      * 文件上传
      */
-    public static synchronized Miniofile uploadFiles(MultipartFile file){
-        Miniofile minioFile = new Miniofile();
-
+    public static synchronized Miniofile uploadFile(MultipartFile file){
         String filename = file.getOriginalFilename();//原文件名（有后缀）
+        if(filename==null){
+            return null;
+        }
+
+        Miniofile minioFile = new Miniofile();
         String pureName = TextUtil.getFileName(filename);//原纯文件名
         String suffix = TextUtil.getFileSuffix(filename);//后缀名(无".")
         String cryptyName =  CryptyUtil.cryptyFileName(pureName);//加密文件名
@@ -281,14 +290,62 @@ public class FileUploadUtil {
             e.printStackTrace();
         }
 
-        minioFile.setSavename(saveName);//更改为服务器存储地址 //UUID.randomUUID().toString()
-        minioFile.setName(pureName);
-        minioFile.setSuffix(suffix);
-        minioFile.setType(TextUtil.getTypeFromSuffix(suffix));
-        minioFile.setUrl(url);
-        minioFile.setCreatedate(TimeUtil.getStringDateNow(TimeUtil.DATE_FORMAT_YMDHM));
-        minioFile.setSize(file.getSize());
-//        LogUtil.debug(TAG, "url: " + url);
+        if(url!=null){//上传成功
+            int type = TextUtil.getTypeFromSuffix(suffix);
+            boolean needThumb = false;
+            File thumbFile = null;
+            MediaInfo mediaInfo = null;
+            //todo 分辨率，缩略图, 时长
+            switch (type){
+                case TextUtil.MEDIA_IAMGE://图片：分辨率，缩略图
+                    needThumb = true;
+                    thumbFile = new File(FileUtil.getWebAppPath(FileUploadUtil.class)+File.separator+ Constants.TEMP_THUMB_PATH);
+                    try {
+                        mediaInfo = MediaUtil.getImageInfo(file.getInputStream());
+                        MediaUtil.getImageThumb(file.getInputStream(), thumbFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case TextUtil.MEDIA_VIDEO://视频：分辨率，缩略图，时长
+                    needThumb = true;
+                    thumbFile = new File(FileUtil.getWebAppPath(FileUploadUtil.class)+File.separator+ Constants.TEMP_THUMB_PATH);
+                    mediaInfo = MediaUtil.getAVInfo(file);
+                    try {
+                        MediaUtil.fetchFrame(file.getInputStream(), thumbFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case TextUtil.MEDIA_AUDIO://音频：时长
+                    mediaInfo = MediaUtil.getAVInfo(file);
+                    break;
+            }
+
+            //上传缩略图
+            if(needThumb){
+                try {
+                    String thumbName = Constants.THUMB_PATH + "/" + UUID.randomUUID().toString() + ".jpg";//存储文件名
+                    String thumbUrl = MinioManager.uploadImg(new FileInputStream(thumbFile), thumbName);
+                    minioFile.setThumb(thumbUrl);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            minioFile.setSavename(saveName);//更改为服务器存储地址 //UUID.randomUUID().toString()
+            minioFile.setName(pureName);
+            minioFile.setSuffix(suffix);
+            minioFile.setType(type);
+            minioFile.setUrl(url);
+            minioFile.setCreatedate(TimeUtil.getStringDateNow(TimeUtil.DATE_FORMAT_YMDHM));
+            minioFile.setSize(file.getSize());
+            if(mediaInfo!=null){
+                minioFile.setResolve(mediaInfo.getResolve());
+                minioFile.setDuration(mediaInfo.getDurition());
+            }
+        }
+
         return minioFile;
     }
 
@@ -303,5 +360,60 @@ public class FileUploadUtil {
 
     public static synchronized boolean downloadFile(String saveName, String savePath){
         return MinioManager.downloadFile(saveName, savePath);
+    }
+
+    public static synchronized Miniofile uploadFiles(MultipartFile file){
+        Miniofile minioFile = new Miniofile();
+
+//        String localPath = FileUtil.getUploadRoot(request);
+//        LogUtil.debug(TAG, "local: " + localPath);
+//        String filename = file.getOriginalFilename();//原文件名（有后缀）
+//        String pureName = TextUtil.getFileName(filename);//原纯文件名
+//        String suffix = TextUtil.getFileSuffix(filename);//后缀名(无".")
+//        String cryptyName =  CryptyUtil.cryptyFileName(pureName);//加密文件名
+//        String saveName = TimeUtil.getStringDateNow(TimeUtil.DATE_FORMAT_YMD) + "/" + cryptyName + "." + suffix;//存储文件名
+//        String contentType = ContentType.get(suffix);
+//
+//        String url = null;
+//        try {
+//            url = MinioManager.uploadFile(file.getInputStream(), saveName, contentType);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+//        File thumbFile = new File(FileUtil.getWebAppPath(FileUploadUtil.class)+File.separator+Constants.TEMP_THUMB_PATH);
+//        try {
+//            MediaInfo mediaInfo = MediaUtil.getImageInfo(file.getInputStream());
+//            if(mediaInfo!=null){
+//                LogUtil.debug(TAG, "resolve: " + mediaInfo.getResolve());
+//            }
+//            Thumbnails.of(file.getInputStream()).size(Constants.THUMB_SIZE,Constants.THUMB_SIZE).toFile(thumbFile);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        File tempFile = new File(filename);
+//        try {
+//            FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
+//            if(tempFile.exists()){
+//                MediaInfo mediaInfo = MediaUtil.getVideoInfo(tempFile);
+//                if(mediaInfo!=null){
+//                    LogUtil.debug(TAG, mediaInfo.toString());
+//                }
+//
+//                //获取缩略图
+//                File thumbFile = new File(FileUtil.getWebAppPath(FileUploadUtil.class)+File.separator+Constants.TEMP_THUMB_PATH);
+//                MediaUtil.fetchFrame(file.getInputStream(), thumbFile);
+//                tempFile.delete();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        File localFile = new File(localPath + File.separator + filename);
+
+//        MediaInfo mediaInfo = MediaUtil.getAVInfo(file);
+//        if(mediaInfo!=null){
+//            LogUtil.debug(TAG, mediaInfo.toString());
+//        }
+        return minioFile;
     }
 }

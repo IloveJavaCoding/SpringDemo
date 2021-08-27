@@ -1,5 +1,6 @@
 package com.virgo.com.core.util;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -63,5 +64,29 @@ public class FileUtil {
             //System.out.println("创建文件失败！" + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 提取上传的根目录 默认是应用的根
+     * @param request
+     * @return
+     */
+    public static String getUploadRoot(HttpServletRequest request) {
+        if (request == null || request.getServletContext() == null) {
+            return null;
+        }
+        //项目根目录
+        return request.getServletContext().getRealPath("/");
+    }
+
+    /**
+     * 获取webapp 根路径
+     * @param c
+     * @return
+     */
+    public static String getWebAppPath(Class c){
+        String classpath = c.getResource("/").getPath().replaceFirst("/", "");
+        return classpath.replaceAll("WEB-INF/classes/", "");
+        // return request.getServletContext().getRealPath("/");
     }
 }

@@ -6,7 +6,9 @@ package com.virgo.com.core.util;
 public class TextUtil {
     public static final String[] IMAGE_EXTENSION = {"bmp", "gif", "jpg", "jpeg", "png"};
     public static final String[] VIDEO_EXTENSION = {"swf", "flv", "mp4", "wma", "3gp", "wmv", "mpeg", "mid", "avi", "mpg", "asf", "rmvb"};
-    public static final String[] AUDIO_EXTENSION = {"mp3", "wav", "acc", "ogg"};
+    public static final String[] AUDIO_EXTENSION = {"mp3", "wav", "acc", "ogg", "flac", "ncm"};
+    public static final String[] TEXT_EXTENSION = { "doc", "docx", "xls", "xlsx", "ppt", "pptx", "html", "htm", "txt"};
+    public static final String[] MEDIA_EXTENSION = {"swf", "flv", "mp4", "mp3", "wav", "wma", "3gp", "wmv", "mpeg", "mid", "avi", "mpg", "asf", "rmvb"};
     public static final String[] DEFAULT_ALLOWED_EXTENSION = {
             // 图片
             "bmp", "gif", "jpg", "jpeg", "png",
@@ -22,6 +24,7 @@ public class TextUtil {
     public static final int MEDIA_IAMGE = 1;
     public static final int MEDIA_AUDIO = 2;
     public static final int MEDIA_VIDEO = 3;
+    public static final int MEDIA_TEXT = 4;
 
     /**
      * 判断字符非空
@@ -152,6 +155,13 @@ public class TextUtil {
                 return MEDIA_VIDEO;
             }
         }
+
+        for(String str: TEXT_EXTENSION){
+            if(suffix.equals(str)){
+                return MEDIA_TEXT;
+            }
+        }
+
         return MEDIA_ALL;
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
  * 默认返回HTML即页面，若不想如此可设置response返回类型未text/json;
  */
 @Controller
+
 public class PageController extends PcBaseControllerr {
     private static final String TAG = "PageController";
 

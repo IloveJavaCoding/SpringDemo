@@ -5,12 +5,14 @@
     <meta charset="UTF-8">
     <title>Virgo Source</title>
     <link href="/SpringDemo/static/res/icon/icon_logo.ico" rel="shortcut icon"/>
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/commonstyle.css"/>
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/tablelist.css"/>
-    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/sourcepage.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/common/commonstyle.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/common/tablelist.css"/>
+    <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/page/sourcepage.css"/>
     <!--支持jquery-->
 <%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
     <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
+    <script src="/SpringDemo/static/js/layer/layer.js"></script>
+    <script type="text/javascript" src="/SpringDemo/static/js/page/sourcepage.js"></script>
 
     <script type="text/javascript">
         var curPage = 1;//默认为第一页数据
@@ -28,6 +30,7 @@
         }
 
         function uploadFile() {
+            var loading = top.layer.load(0, '正在上传中。。。');
             var formData = new FormData();
             formData.append("file",$("#filename")[0].files[0]);
             $.ajax({
@@ -40,11 +43,21 @@
                 contentType: false,
                 success:function (res) {
                     console.log(res);
+                    top.layer.close(loading);
                     if(res!=null){
                         if(res.code==="SUCCESS"){
-                            alert(res.msg+": " + res.data);
+                            layer.open({
+                                title:'上传结果',
+                                content:res.msg + "\n" + res.data,
+                                icon:1,
+                                time:3000
+                            });
                         }else{
-                            alert(res.msg);
+                            layer.open({
+                                title:'上传结果',
+                                content:res.msg,
+                                icon:2,
+                            });
                         }
                     }
                 }
@@ -52,6 +65,7 @@
         }
 
         function loadFiles(page, type) {
+            var loading = top.layer.load(0, '加载数据。。。');
             $.ajax({
                 cache:false,
                 type:"POST",
@@ -67,6 +81,7 @@
                 },
                 success:function (response) {
                     // alert(response.msg);
+                    top.layer.close(loading);
                     if(response.code!=="SUCCESS"){
                         alert(response.msg);
                         return;
@@ -81,21 +96,27 @@
                     json.forEach(function(value){
                         var id = value.id;
                         var name = value.name;
-                        var url = value.url;
-                        var createdate = value.createdate;
+                        var thumb = value.thumb;
                         var type = value.suffix;
+                        var dur = formatTime(value.duration);
                         var size = formatFileSize(value.size);
+                        var resolve = value.resolve;
+                        var createdate = value.createdate;
+                        var url = value.url;
 
                         str += "<tr>";
                         str += "<td>"+ id + "</td>";
                         str += "<td>"+ name + "</td>";
+                        str += "<td><img src=\""+ thumb + "\" alt='暂无' width='80' height='45'/></td>";
                         str += "<td>"+ type + "</td>";
+                        str += "<td>"+ dur + "</td>";
                         str += "<td>"+ size + "</td>";
+                        str += "<td>"+ resolve + "</td>";
                         str += "<td>"+ createdate + "</td>";
                         str += "<td>";
                         str += "<button onclick='openUrl(\""+url+"\")'>预览</button>";
-                        // str += "<button onclick='download(\""+url+"\", \""+name+"\")'>下载</button>";
-                        str += "<button onclick='download("+id+")'>下载</button>";
+                        str += "<button onclick='download2(\""+url+"\", \""+name+"\", \""+type+"\")'>下载</button>";
+                        // str += "<button onclick='download("+id+")'>下载</button>";
                         str += "<button onclick='deleteFile("+id+")'>删除</button>";
                         str += "</td>";
                         str += "</tr>";
@@ -118,10 +139,32 @@
             if(type===curType){
                 console.log("类型未变化！");
             }else{
+                setLiCss("");
                 //切换类型
                 curType = type;
                 curPage = 0;
+                setLiCss("nav_selected");
                 loadFiles(curPage, curType);
+            }
+        }
+
+        function setLiCss(cName) {
+            switch (curType) {
+                case 0:
+                    document.getElementById("li_all").className=cName;
+                    break;
+                case 1:
+                    document.getElementById("li_image").className=cName;
+                    break;
+                case 2:
+                    document.getElementById("li_audio").className=cName;
+                    break;
+                case 3:
+                    document.getElementById("li_video").className=cName;
+                    break;
+                case 4:
+                    document.getElementById("li_text").className=cName;
+                    break;
             }
         }
 
@@ -131,7 +174,7 @@
                 setCurPage();
                 loadFiles(curPage, curType);
             }else{
-                alert("当前为第一页！")
+                layer.msg("当前为第一页！")
             }
         }
 
@@ -141,7 +184,7 @@
                 setCurPage();
                 loadFiles(curPage, curType);
             }else{
-                alert("当前为最后一页！")
+                layer.msg("当前为最后一页！")
             }
         }
 
@@ -177,31 +220,7 @@
             }
         }
 
-        function openUrl(url) {
-            window.open(url);
-            //window.location=url;
-
-            // const link = document.createElement('a');
-            // link.setAttribute('href', url); //设置下载文件的url地址
-            // // link.setAttribute('download', name); //用于设置下载文件的文件名
-            // link.click();
-
-            // var $form = $('<form method="GET"></form>');
-            // $form.attr('action', url);
-            // $form.appendTo($('body'));
-            // $form.submit();
-        }
-
         function download(id) {
-            // console.log("download: " + url +", " + name);
-            // const link = document.createElement('a');
-            // link.setAttribute('href', url); //设置下载文件的url地址
-            // link.setAttribute('download', name); //用于设置下载文件的文件名
-            // link.style.display = 'none';
-            // document.body.appendChild(link);
-            // link.click();
-            // document.body.removeChild(link);
-
             if(id!==null) {
                 //选择路径弹框
                 $.ajax({
@@ -224,9 +243,21 @@
             }
         }
 
-    </script>
+        function download2(url, name, suffix) {
+            downloadDialog(url, name, suffix);
+        }
 
-    <script type="text/javascript" src="/SpringDemo/static/js/commonjs.js"></script>
+        function showLoadDialog(str) {
+            layer.open({
+                type:3,
+                icon:0,
+                content:str,
+                time:3000
+            });
+        }
+
+    </script>
+    <script type="text/javascript" src="/SpringDemo/static/js/common/commonjs.js"></script>
 </head>
 
 <body onload="onLoad(); loadData()">
@@ -246,7 +277,7 @@
     </div>
 
     <div id="main" class="main">
-        <a href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
+        <a id="go_top" href="#main" class="back_top_icon"><img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
         <div class="file_upload">
             <%--            method="post" action="/SpringDemo/home/upload"--%>
@@ -254,22 +285,22 @@
                 <input type="file" id="filename" name="filename"/>
                 <button type="button" onclick="uploadFile()">上传</button>
             </form>
+<%--            <br/>--%>
 
-            <br/>
-
-            <form id="upload_file2" class="form_upload_file" method="post" action="/SpringDemo/source/uploadFile" enctype="multipart/form-data">
-                <input type="file" name="file"/>
-                <input type="submit" value="上传"/>
-            </form>
+<%--            <form id="upload_file2" class="form_upload_file" method="post" action="/SpringDemo/source/uploadFile" enctype="multipart/form-data">--%>
+<%--                <input type="file" name="file"/>--%>
+<%--                <input type="submit" value="上传"/>--%>
+<%--            </form>--%>
         </div>
 
         <div class="div_file">
             <div class="file_navigation">
                 <ul class="ul_nav_file">
-                    <li class="nav_selected" onclick="changeType(0)">全部文件</li>
-                    <li onclick="changeType(1)">图片文件</li>
-                    <li onclick="changeType(2)">音频文件</li>
-                    <li onclick="changeType(3)">视频文件</li>
+                    <li id="li_all" class="nav_selected" onclick="changeType(0)">全部文件</li>
+                    <li id="li_image" onclick="changeType(1)">图片文件</li>
+                    <li id="li_audio" onclick="changeType(2)">音频文件</li>
+                    <li id="li_video" onclick="changeType(3)">视频文件</li>
+                    <li id="li_text" onclick="changeType(4)">文本文件</li>
                 </ul>
             </div>
 
@@ -279,8 +310,11 @@
                     <tr>
                         <th>id</th>
                         <th>名字</th>
+                        <th>略图</th>
                         <th>类型</th>
+                        <th>时长</th>
                         <th>大小</th>
+                        <th>分辨率</th>
                         <th>创建日期</th>
                         <th>操作</th>
                     </tr>
@@ -292,7 +326,7 @@
 
                     <tfoot id="table_file_foot" class="table_data_foot">
                     <tr>
-                        <td colspan="6">
+                        <td colspan="9">
                             <span class="span_button" onclick="lastPage();">上一页</span>
                             第<span id="span_curpage" class="span_hight"></span>页
                             共<span id="span_allpage" class="span_hight"></span>页
@@ -309,6 +343,8 @@
                download="temp.png">点我下载</a>
 
             <button onclick="saveDialog()">打开文件夹</button>
+
+            <button onclick="showLoadDialog('点我')">点我</button>
         </div>
 
     </div>
