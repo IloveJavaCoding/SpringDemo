@@ -31,6 +31,15 @@
         function getLoginUser() {
             return '<%=session.getAttribute("username")%>';
         }
+
+        function showTable() {
+            layer.open({
+                type:2,
+                title:'表格',
+                content:['home/itable', 'no'],
+                area:['800px','500px']
+            });
+        }
     </script>
     <script type="text/javascript" src="/SpringDemo/static/js/common/commonjs.js"></script>
 </head>
@@ -56,6 +65,10 @@
     <a id="go_top" href="#main" class="back_top_icon">
         <img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
+
+    <div class="test">
+        <button onclick="showTable()">显示表格</button>
+    </div>
     <div>
         <a href="http://www.baidu.com/" target="home_frame"><span>百度</span></a> |
         <a href="https://www.runoob.com/" target="home_frame"><span>菜鸟</span></a> |

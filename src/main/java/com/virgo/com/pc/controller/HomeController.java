@@ -12,4 +12,9 @@ public class HomeController {
     public ModelAndView showHomePage(){
         return new ModelAndView("home/default");
     }
+
+    @RequestMapping("/itable")
+    public ModelAndView showITable(){
+        return new ModelAndView("home/itable");
+    }
 }
