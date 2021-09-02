@@ -5,23 +5,34 @@ let allpage = 0;//总页数
 let tBody;//数据显示区
 let spanCur;//当前页
 let spanAll;//总页
+let checkBoxAll;//全选复选框
 
 let headMap;//表头组: map(key, name)
 let dataList;//数据缓存列表，原数据
 let tempList = [];//数据缓存列表，临时操作数据
+let selecList = [];//选中项列表；id
 
 let maxLine = 10;//每页最大显示数据行数
 let sortKey = "id";//当前排序列
 let isIncrease = true;//默认小->大
 
+// forEach方法中的function回调有三个参数：
+// 第一个参数是遍历的数组内容，
+// 第二个参数是对应的数组索引，
+// 第三个参数是数组本身
+
 /**
  * 初始化页面
+ * 要求有id列，主键，值为int
  * @param theads
  */
 function initView(theads) {
     const root = document.createElement("div");
+    root.setAttribute("class", "layout_root");
     root.appendChild(initController());
     root.appendChild(initTable(theads));
+    root.appendChild(initButton());
+
     return root;
 }
 
@@ -30,9 +41,10 @@ function initView(theads) {
  */
 function initController() {
     const div = document.createElement("div");
+    div.setAttribute("class", "layout_controller");
 
     const span1 = document.createElement("span");
-    span1.innerText = "最大行数：";
+    span1.innerText = "显示行数：";
 
     const select = document.createElement("select");
     const option1 = document.createElement("option");
@@ -60,13 +72,14 @@ function initController() {
         updateShowData();
     });
 
+    const layout_search = document.createElement("div");
+    layout_search.setAttribute("class", "layout_search");
     const span2 = document.createElement("span");
     span2.innerText = "搜索：";
     const input = document.createElement("input");
     input.setAttribute("type", "text");
     input.addEventListener("input", function () {
         const value = input.value;
-        console.log("input: " + value);
         if(value.length>0){
             //不为空时
             loadCurPageFilter(value);
@@ -75,11 +88,12 @@ function initController() {
             updateTempData(dataList);
         }
     })
+    layout_search.appendChild(span2);
+    layout_search.appendChild(input);
 
     div.appendChild(span1);
     div.appendChild(select);
-    div.appendChild(span2);
-    div.appendChild(input);
+    div.appendChild(layout_search);
 
     return div;
 }
@@ -90,14 +104,30 @@ function initController() {
  */
 function initTable(theads) {
     headMap = theads;
-    const columns = theads.size;
+    const columns = theads.size + 2;//首列：选择框，尾列：操作栏
 
     const table = document.createElement("table");
-    table.setAttribute("class", "table_root");
+    table.setAttribute("class", "layout_table");
 
     const tHead = document.createElement("thead");
     tHead.setAttribute("class", "table_head");
     const trH = document.createElement("tr");
+    //首列：选择框
+    const thA = document.createElement("th");
+    thA.setAttribute("class", "table_th_a");
+    checkBoxAll = document.createElement("input");
+    checkBoxAll.setAttribute("type", "checkbox");
+    checkBoxAll.value = "-1";//全选
+    checkBoxAll.innerText = "全选";
+    checkBoxAll.addEventListener("change", function () {
+        console.log("select all: " + checkBoxAll.checked);
+        //更新选中数据
+        upadteChooseDataAll();
+        //更新状态
+        loadCurPage();
+    });
+    thA.appendChild(checkBoxAll);
+    trH.appendChild(thA);
     headMap.forEach(function (value, key) {
         const th = document.createElement("th");
         th.addEventListener("click", function () {
@@ -106,6 +136,12 @@ function initTable(theads) {
         th.innerHTML=value;
         trH.appendChild(th);
     });
+    //尾列：操作栏
+    const thZ = document.createElement("th");
+    thZ.setAttribute("class", "table_th_z");
+    thZ.innerHTML="操作";
+    trH.appendChild(thZ);
+
     tHead.appendChild(trH);
 
     tBody = document.createElement("tbody");
@@ -161,6 +197,19 @@ function initTable(theads) {
 }
 
 /**
+ * 底部悬浮确定按钮
+ */
+function initButton() {
+    const confirm = document.createElement("span");
+    confirm.setAttribute("class", "layout_confirm_button")
+    confirm.innerText = "确定";
+    confirm.addEventListener("click", function () {
+        returnSelectData();
+    })
+    return confirm;
+}
+
+/**
  * 设置数据源，更新缓存
  * @param data json数组
  */
@@ -173,12 +222,11 @@ function setData(data) {
 
 /**
  * 筛选
- * @param key
+ * @param filter
  */
 function loadCurPageFilter(filter) {
     const temp = [];
-    for(let i=0; i<dataList.length; i++){
-        const obj = dataList[i];
+    dataList.forEach(function (obj) {
         headMap.forEach(function (value, key) {
             const v = obj[key].toString();
             if(v.search(filter)!==-1){
@@ -187,7 +235,8 @@ function loadCurPageFilter(filter) {
                 return true;
             }
         });
-    }
+    });
+
     updateTempData(temp);
 }
 
@@ -214,7 +263,6 @@ function loadCurPage() {
  * @returns {undefined}
  */
 function sortData(key) {
-
     if(key===sortKey){
         //更换顺序
         isIncrease = !isIncrease;
@@ -321,10 +369,29 @@ function showData2(start, end){
     let str = "";
     for(let i=start; i<end; i++){
         const obj = tempList[i];
-        str += "<tr>";
+        const id = obj.id;
+
+        if(i%2===0){
+            //单行
+            str += "<tr class='tr_single'>";
+        }else{
+            //双行
+            str += "<tr class='tr_double'>";
+        }
+
+        if(checkBoxAll.checked){
+            str += "<td><input type='checkbox' value='"+ id +"' checked='checked' onchange='upadteChooseData(this)'/></td>";//要求有id栏（主键）
+        }else{
+            str += "<td><input type='checkbox' value='"+ id +"' onchange='upadteChooseData(this)'/></td>";//要求有id栏（主键）
+        }
         headMap.forEach(function (value, key) {
             str += "<td>"+ obj[key]+ "</td>";
         });
+        str += "<td>";
+        // str += "<button onclick='openUrl(\""+url+"\")'>预览</button>";
+        // str += "<button onclick='download2(\""+url+"\", \""+name+"\", \""+type+"\")'>下载</button>";
+        str += "<button onclick='deleteData("+id+")'>删除</button>";
+        str += "</td>";
         str += "</tr>";
     }
     tBody.innerHTML = str;
@@ -377,4 +444,72 @@ function setPageNum() {
         }
         spanAll.innerText = allpage;
     }
+}
+
+//全选、非全选更新状态
+function upadteChooseDataAll() {
+    selecList = [];
+    if(checkBoxAll.checked){
+        tempList.forEach(function (value, index) {
+            selecList.push(tempList[index].id);
+        });
+    }
+}
+
+/**
+ * 某个复选框状态变化时更新
+ * @param checkbox
+ */
+function upadteChooseData(checkbox) {
+    let id = checkbox.value;//string
+    id = parseInt(id);
+    // let index = selecList.existInArray(id);
+    let index = selecList.indexOf(id);
+    if(checkbox.checked){
+        //选中
+        if(index===-1){
+            //不存在则添加
+            selecList.push(id);
+        }
+    }else{
+        checkBoxAll.checked = false;
+        if(index!==-1){
+            //存在则删除
+            selecList.splice(index, 1);
+        }
+    }
+}
+
+function deleteData(id) {
+    if(tempList!=null){
+        tempList.forEach(function (value) {
+            if(value.id===id){
+                //找到了
+                console.log("delete: " + id);
+                return true;
+            }
+        })
+    }
+}
+
+function returnSelectData() {
+    console.log("return: " + selecList.toString())
+}
+
+//自定义 indexof
+Array.prototype.existInArray = function (ele) {
+    let out = -1;
+    if(this.length<1){
+        return out;
+    }
+
+    this.forEach(function (value, index) {
+        if(value===ele){
+            console.log("找到了： " + index);
+            out = index;
+            return true;
+        }
+    })
+
+    return out;
 }

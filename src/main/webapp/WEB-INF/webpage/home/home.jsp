@@ -36,7 +36,7 @@
             layer.open({
                 type:2,
                 title:'表格',
-                content:['home/itable', 'no'],
+                content:'home/itable',
                 area:['800px','500px']
             });
         }
