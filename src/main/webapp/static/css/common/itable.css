@@ -4,7 +4,11 @@
  */
 /*根布局*/
 .layout_root{
-    padding: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 40px;
+    position: relative;
 }
 
 /*控制栏*/
@@ -26,7 +30,7 @@
     width:100%;
     border:0;
     text-align:center;
-    /*background-color:#cdcdcd;*/
+    background-color: snow;
 }
 
 /*表头：属性*/
@@ -54,11 +58,11 @@
     color: #000;
 }
 
-.table_body .tr_single{
+.table_body .table_tr_single{
     background-color:#F6F4F0;
 }
 
-.table_body .tr_double{
+.table_body .table_tr_double{
     background-color: #cdcdcd;
 }
 
@@ -69,34 +73,39 @@
     color: grey;
 }
 
-.table_foot .span_hight{
+.table_foot .span_highlight{
     color: #66ccff;
 }
 
-.table_foot span{
-    margin-right:3px;
+.table_foot p{
+    display: inline;
+    margin-right:5px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 /*表尾按钮*/
-.span_button{
+.p_button{
     border-radius: 3px;
-    padding-left: 5px;
-    padding-right: 5px;
     background-color: #F6F4F0;
 }
 
-.span_button:hover{
+.p_button:hover{
     cursor: pointer;
     background-color: #666666;
     color: white;
 }
 
-.span_button:active{
+.p_button:active{
     background-color: #F6F4F0;
     color: red;
 }
 
-/*顶部悬浮按钮*/
+/*底部悬浮按钮*/
+.layout_div_button{
+    height: 50px;
+}
+
 .layout_confirm_button{
     display: block;
     width: 50px;
@@ -107,9 +116,10 @@
     border-radius: 50px;
     border: 1px solid #cdcdcd;
     text-align: center;
-    position:fixed;
-    bottom:20px;
-    right:20px;
+    /*float: right;*/
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
     transition:background-color 0.3s;
 }
 

@@ -34,7 +34,7 @@
         function addTable() {
             var root = document.getElementById("root_view");
             var head = new Map([['id','id'], ['name','名字'], ['gender','性别'], ['age','年龄']]);
-            root.appendChild(initView(head));
+            root.appendChild(createTable(head));
 
             setData(json);
         }

@@ -37,7 +37,27 @@
                 type:2,
                 title:'表格',
                 content:'home/itable',
-                area:['800px','500px']
+                area:['800px','500px'],
+                anim:6
+            });
+        }
+
+        function showMsg() {
+            layer.open({
+                type:0,
+                icon:6,
+                title:'提示',
+                content:'Hello world!'
+            });
+        }
+
+        function showLoad() {
+            layer.open({
+                type:3,
+                icon:0,
+                title:'加载',
+                shade: [0.5, 'gray'],
+                time:3000
             });
         }
     </script>
@@ -65,39 +85,23 @@
     <a id="go_top" href="#main" class="back_top_icon">
         <img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
-
-    <div class="test">
-        <button onclick="showTable()">显示表格</button>
-    </div>
     <div>
         <a href="http://www.baidu.com/" target="home_frame"><span>百度</span></a> |
         <a href="https://www.runoob.com/" target="home_frame"><span>菜鸟</span></a> |
         <a href="https://huaban.com/" target="home_frame"><span>花瓣</span></a> |
     </div>
-
     <br/>
-    <div class="div_frame_nav">
-        <ul id="frame_ul">
-            <li class="nav_selected">
-                <a href="/SpringDemo/home/default" target="home_frame">默认</a>
-            </li>
-            <li>
-                <a href="/SpringDemo/html/table" target="home_frame">表格</a>
-                <div class="del_button">X</div>
-            </li>
-            <li>
-                <a href="/SpringDemo/html/table" target="home_frame">表格</a>
-            </li>
-            <li>
-                <a href="/SpringDemo/html/table" target="home_frame">表格</a>
-            </li>
-        </ul>
-    </div>
 
     <div class="div_frame">
         <!--src: 默认加载页-->
         <iframe id="home_frame" name="home_frame" class="home_frame"
-                src="/SpringDemo/home/default" width="100%" height="100%"></iframe>
+                src="/SpringDemo/home/itable" width="100%" height="100%"></iframe>
+    </div>
+
+    <div id="layer_test">
+        <button onclick="showTable()">显示表格</button>
+        <button onclick="showMsg()">提示消息</button>
+        <button onclick="showLoad()">加载</button>
     </div>
 </div>
 

@@ -65,7 +65,7 @@
         }
 
         function loadFiles(page, type) {
-            var loading = top.layer.load(0, '加载数据。。。');
+            var loading = top.layer.load(0);
             $.ajax({
                 cache:false,
                 type:"POST",

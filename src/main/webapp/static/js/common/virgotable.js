@@ -1,11 +1,53 @@
 //智能表格
+//常量：
+//1. id
+const ATTR_ID = 'id';
+const ATTR_CLASS = 'class';
+const ATTR_TYPE = 'type';
+
+const ID_TABLE_BODY = 'table_body';
+const ID_SPAN_CONFIRM_BUTTON = 'confirm_button';
+const ID_CHECK_BOX_ALL = 'checkBoxAll';
+const ID_SPAN_CUR_PAGE = 'span_cur';
+const ID_SPAN_ALL_PAGE = 'span_all';
+
+const CLASS_LAYOUT_ROOT = 'layout_root';
+const CLASS_LAYOUT_CONTROL = 'layout_controller';
+const CLASS_LAYOUT_SEARCH = 'layout_search';
+const CLASS_LAYOUT_TABLE = 'layout_table';
+const CLASS_LAYOUT_TABLE_HEAD = 'table_head';
+const CLASS_LAYOUT_TABLE_TH_A = 'table_th_a';
+const CLASS_LAYOUT_TABLE_TH_Z = 'table_th_z';
+const CLASS_LAYOUT_TABLE_BODY = 'table_body';
+const CLASS_LAYOUT_TABLE_TR_SINGLE = 'table_tr_single';
+const CLASS_LAYOUT_TABLE_TR_DOUBLE = 'table_tr_double';
+const CLASS_LAYOUT_TABLE_FOOT = 'table_foot';
+const CLASS_LAYOUT_P_BUTTON = 'p_button';
+const CLASS_LAYOUT_SPAN_HIGH_LIGHT = 'span_highlight';
+const CLASS_LAYOUT_CONFIRM_BUTTON = 'layout_confirm_button';
+
+const TYPE_TEXT = 'text';
+const TYPE_CHECK_BOX = 'checkbox';
+
+//2. listener type
+const LISTENER_TYPE_CHANGE = 'change';
+const LISTENER_TYPE_CLICK = 'click';
+const LISTENER_TYPE_INPUT = 'input';
+
+//3. text
+const TEXT_MAX_LINE = '显示行数：';
+const TEXT_SEARCH = '搜索：';
+const TEXT_TH_OPE = '操作';
+const TEXT_OPE_DELETE = '删除';
+const TEXT_LAST_PAGE = '上一页';
+const TEXT_NEXT_PAGE = '下一页';
+const TEXT_CONFIRM = '确定';
+const TEXT_NOTCIE_FIRST = '当前为第一页！';
+const TEXT_NOTCIE_END = '当前为最后一页！';
+
+//变量：
 let curpage = 1;//当前页
 let allpage = 0;//总页数
-
-let tBody;//数据显示区
-let spanCur;//当前页
-let spanAll;//总页
-let checkBoxAll;//全选复选框
 
 let headMap;//表头组: map(key, name)
 let dataList;//数据缓存列表，原数据
@@ -16,19 +58,15 @@ let maxLine = 10;//每页最大显示数据行数
 let sortKey = "id";//当前排序列
 let isIncrease = true;//默认小->大
 
-// forEach方法中的function回调有三个参数：
-// 第一个参数是遍历的数组内容，
-// 第二个参数是对应的数组索引，
-// 第三个参数是数组本身
-
+////////////////////////////////////////////////////////////////////////////
 /**
  * 初始化页面
  * 要求有id列，主键，值为int
  * @param theads
  */
-function initView(theads) {
+function createTable(theads) {
     const root = document.createElement("div");
-    root.setAttribute("class", "layout_root");
+    root.setAttribute(ATTR_CLASS, CLASS_LAYOUT_ROOT);
     root.appendChild(initController());
     root.appendChild(initTable(theads));
     root.appendChild(initButton());
@@ -37,14 +75,133 @@ function initView(theads) {
 }
 
 /**
+ * 设置数据源，更新缓存
+ * @param data json数组
+ */
+function setData(data) {
+    if(data!==null && data.length>0){
+        dataList = data;
+        updateTempData(data);
+    }
+}
+
+/**
+ * 控制确认按钮的显隐
+ */
+function showButton(visible) {
+    let button = document.getElementById(ID_SPAN_CONFIRM_BUTTON);
+    if(visible){
+        button.style.visibility = "visible";
+    }else{
+        button.style.visibility = "hidden";
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+/**
+ * 将数据显示到table
+ * @param start 开始索引
+ * @param end 结束索引
+ */
+function showData(start, end){
+    let str = "";
+    for(let i=start; i<end; i++){
+        const obj = tempList[i];
+        const id = obj.id;
+        const name = obj.name;
+        const thumb = obj.thumb;
+        const type = obj.suffix;
+        const dur = formatTime(obj.duration);
+        const size = formatFileSize(obj.size);
+        const resolve = obj.resolve;
+        const createdate = obj.createdate;
+        const url = obj.url;
+
+        str += "<tr>";
+        str += "<td>"+ id + "</td>";
+        str += "<td>"+ name + "</td>";
+        str += "<td><img src=\""+ thumb + "\" alt='暂无' width='80' height='45'/></td>";
+        str += "<td>"+ type + "</td>";
+        str += "<td>"+ dur + "</td>";
+        str += "<td>"+ size + "</td>";
+        str += "<td>"+ resolve + "</td>";
+        str += "<td>"+ createdate + "</td>";
+        str += "<td>";
+        str += "<button onclick='openUrl(\""+url+"\")'>预览</button>";
+        str += "<button onclick='download2(\""+url+"\", \""+name+"\", \""+type+"\")'>下载</button>";
+        // str += "<button onclick='download("+id+")'>下载</button>";
+        str += "<button onclick='deleteFile("+id+")'>删除</button>";
+        str += "</td>";
+        str += "</tr>";
+    }
+    setTableDate(str);
+}
+
+/**
+ * 将数据显示到table，通用，仅读，按照表头顺序
+ * @param start 开始索引
+ * @param end 结束索引
+ */
+function showDataCommon(start, end){
+    let str = "";
+    for(let i=start; i<end; i++){
+        const obj = tempList[i];
+        const id = obj.id;
+
+        if(i%2===0){
+            //单行
+            str += "<tr class='"+CLASS_LAYOUT_TABLE_TR_SINGLE+"'>";
+        }else{
+            //双行
+            str += "<tr class='"+CLASS_LAYOUT_TABLE_TR_DOUBLE+"'>";
+        }
+
+        if(getCheckBoxALLState()){
+            str += "<td><input type='"+TYPE_CHECK_BOX+"' value='"+ id +"' checked='checked' onchange='upadteChooseData(this)'/></td>";//要求有id栏（主键）
+        }else{
+            str += "<td><input type='"+TYPE_CHECK_BOX+"' value='"+ id +"' onchange='upadteChooseData(this)'/></td>";//要求有id栏（主键）
+        }
+
+        headMap.forEach(function (value, key) {
+            str += "<td>"+ obj[key]+ "</td>";
+        });
+
+        str += "<td>";
+        str += "<button onclick='deleteData("+id+")'>"+TEXT_OPE_DELETE+"</button>";
+        str += "</td>";
+        str += "</tr>";
+    }
+    setTableDate(str);
+}
+
+//todo
+function deleteData(id) {
+    if(tempList!=null){
+        tempList.forEach(function (value) {
+            if(value.id===id){
+                //找到了
+                console.log("delete: " + id);
+                return true;
+            }
+        })
+    }
+}
+
+function returnSelectData() {
+    console.log("return: " + selecList.toString())
+}
+
+///////////////////////////////////////////////////////////////////////////
+/**
  * 控制栏
  */
 function initController() {
     const div = document.createElement("div");
-    div.setAttribute("class", "layout_controller");
+    div.setAttribute(ATTR_CLASS, CLASS_LAYOUT_CONTROL);
 
     const span1 = document.createElement("span");
-    span1.innerText = "显示行数：";
+    span1.innerText = TEXT_MAX_LINE;
 
     const select = document.createElement("select");
     const option1 = document.createElement("option");
@@ -67,18 +224,18 @@ function initController() {
     select.appendChild(option4);
 
     //监听 select 选项变化
-    select.addEventListener("change", function () {
+    select.addEventListener(LISTENER_TYPE_CHANGE, function () {
         maxLine = select.options[select.selectedIndex].value;
         updateShowData();
     });
 
     const layout_search = document.createElement("div");
-    layout_search.setAttribute("class", "layout_search");
+    layout_search.setAttribute(ATTR_CLASS, CLASS_LAYOUT_SEARCH);
     const span2 = document.createElement("span");
-    span2.innerText = "搜索：";
+    span2.innerText = TEXT_SEARCH;
     const input = document.createElement("input");
-    input.setAttribute("type", "text");
-    input.addEventListener("input", function () {
+    input.setAttribute(ATTR_TYPE, TYPE_TEXT);
+    input.addEventListener(LISTENER_TYPE_INPUT, function () {
         const value = input.value;
         if(value.length>0){
             //不为空时
@@ -107,22 +264,21 @@ function initTable(theads) {
     const columns = theads.size + 2;//首列：选择框，尾列：操作栏
 
     const table = document.createElement("table");
-    table.setAttribute("class", "layout_table");
+    table.setAttribute(ATTR_CLASS, CLASS_LAYOUT_TABLE);
 
     const tHead = document.createElement("thead");
-    tHead.setAttribute("class", "table_head");
+    tHead.setAttribute(ATTR_CLASS, CLASS_LAYOUT_TABLE_HEAD);
     const trH = document.createElement("tr");
     //首列：选择框
     const thA = document.createElement("th");
-    thA.setAttribute("class", "table_th_a");
-    checkBoxAll = document.createElement("input");
-    checkBoxAll.setAttribute("type", "checkbox");
-    checkBoxAll.value = "-1";//全选
-    checkBoxAll.innerText = "全选";
-    checkBoxAll.addEventListener("change", function () {
-        console.log("select all: " + checkBoxAll.checked);
+    thA.setAttribute(ATTR_CLASS, CLASS_LAYOUT_TABLE_TH_A);
+
+    const checkBoxAll = document.createElement("input");
+    checkBoxAll.setAttribute(ATTR_ID, ID_CHECK_BOX_ALL);
+    checkBoxAll.setAttribute(ATTR_TYPE, TYPE_CHECK_BOX);
+    checkBoxAll.addEventListener(LISTENER_TYPE_CHANGE, function () {
         //更新选中数据
-        upadteChooseDataAll();
+        upadteChooseDataAll(checkBoxAll.checked);
         //更新状态
         loadCurPage();
     });
@@ -130,63 +286,51 @@ function initTable(theads) {
     trH.appendChild(thA);
     headMap.forEach(function (value, key) {
         const th = document.createElement("th");
-        th.addEventListener("click", function () {
+        th.addEventListener(LISTENER_TYPE_CLICK, function () {
             sortData(key);
         });
-        th.innerHTML=value;
+        th.innerText=value;
         trH.appendChild(th);
     });
+
     //尾列：操作栏
     const thZ = document.createElement("th");
-    thZ.setAttribute("class", "table_th_z");
-    thZ.innerHTML="操作";
+    thZ.setAttribute(ATTR_CLASS, CLASS_LAYOUT_TABLE_TH_Z);
+    thZ.innerText=TEXT_TH_OPE;
     trH.appendChild(thZ);
-
     tHead.appendChild(trH);
 
-    tBody = document.createElement("tbody");
-    tBody.setAttribute("class", "table_body");
+    const tBody = document.createElement("tbody");
+    tBody.setAttribute(ATTR_ID, ID_TABLE_BODY);
+    tBody.setAttribute(ATTR_CLASS, CLASS_LAYOUT_TABLE_BODY);
 
     const tFoot = document.createElement("tfoot");
-    tFoot.setAttribute("class", "table_foot");
+    tFoot.setAttribute(ATTR_CLASS, CLASS_LAYOUT_TABLE_FOOT);
     const trF = document.createElement("tr");
     const tdF = document.createElement("td");
     tdF.colSpan = columns;
 
-    const spanLast = document.createElement("span");
-    spanLast.setAttribute("class", "span_button");
-    spanLast.innerText = "上一页";
-    spanLast.addEventListener("click", lastPage);
+    const pLast = document.createElement("p");
+    pLast.setAttribute(ATTR_CLASS, CLASS_LAYOUT_P_BUTTON);
+    pLast.innerText = TEXT_LAST_PAGE;
+    pLast.addEventListener(LISTENER_TYPE_CLICK, lastPage);
 
-    const span1 = document.createElement("span");
-    span1.innerText = "第";
-    spanCur = document.createElement("span");
-    spanCur.setAttribute("class", "span_hight");
-    spanCur.innerText = curpage;
-    const span2 = document.createElement("span");
-    span2.innerText = "页";
+    const pCur = document.createElement("p");
+    pCur.innerHTML = "第 <span id='"+ID_SPAN_CUR_PAGE+"' class='"+CLASS_LAYOUT_SPAN_HIGH_LIGHT+"'></span> 页";
 
-    const span3 = document.createElement("span");
-    span3.innerText = "共";
-    spanAll = document.createElement("span");
-    spanAll.setAttribute("class", "span_hight");
-    spanAll.innerText = allpage;
-    const span4 = document.createElement("span");
-    span4.innerText = "页";
+    const pAll = document.createElement("p");
+    pAll.innerHTML = "共 <span id='"+ID_SPAN_ALL_PAGE+"' class='"+CLASS_LAYOUT_SPAN_HIGH_LIGHT+"'></span> 页";
 
-    const spanNext = document.createElement("span");
-    spanNext.setAttribute("class", "span_button");
-    spanNext.innerText = "下一页";
-    spanNext.addEventListener("click", nextPage);
+    const pNext = document.createElement("p");
+    pNext.setAttribute(ATTR_CLASS, CLASS_LAYOUT_P_BUTTON);
+    pNext.innerText = TEXT_NEXT_PAGE;
+    pNext.addEventListener(LISTENER_TYPE_CLICK, nextPage);
 
-    tdF.appendChild(spanLast);
-    tdF.appendChild(span1);
-    tdF.appendChild(spanCur);
-    tdF.appendChild(span2);
-    tdF.appendChild(span3);
-    tdF.appendChild(spanAll);
-    tdF.appendChild(span4);
-    tdF.appendChild(spanNext);
+    tdF.appendChild(pLast);
+    tdF.appendChild(pCur);
+    tdF.appendChild(pAll);
+    tdF.appendChild(pNext);
+
     trF.appendChild(tdF);
     tFoot.appendChild(trF);
 
@@ -201,23 +345,13 @@ function initTable(theads) {
  */
 function initButton() {
     const confirm = document.createElement("span");
-    confirm.setAttribute("class", "layout_confirm_button")
-    confirm.innerText = "确定";
-    confirm.addEventListener("click", function () {
+    confirm.setAttribute(ATTR_ID, ID_SPAN_CONFIRM_BUTTON);
+    confirm.setAttribute(ATTR_CLASS, CLASS_LAYOUT_CONFIRM_BUTTON)
+    confirm.innerText = TEXT_CONFIRM;
+    confirm.addEventListener(LISTENER_TYPE_CLICK, function () {
         returnSelectData();
     })
     return confirm;
-}
-
-/**
- * 设置数据源，更新缓存
- * @param data json数组
- */
-function setData(data) {
-    if(data!==null && data.length>0){
-        dataList = data;
-        updateTempData(data);
-    }
 }
 
 /**
@@ -252,7 +386,7 @@ function loadCurPage() {
             endIndex = size;
         }
         if(size>startIndex){
-            showData2(startIndex, endIndex);
+            showDataCommon(startIndex, endIndex);
         }
     }
 }
@@ -271,7 +405,6 @@ function sortData(key) {
         sortKey = key;
         isIncrease = true;
     }
-    console.log("sort: " + key + ", increase: " + isIncrease);
 
     tempList.sort(function (a, b) {
         if(isIncrease){
@@ -322,82 +455,6 @@ function updateShowData() {
 }
 
 /**
- * 将数据显示到table
- * @param start 开始索引
- * @param end 结束索引
- */
-function showData(start, end){
-    let str = "";
-    for(let i=start; i<end; i++){
-        const obj = tempList[i];
-        const id = obj.id;
-        const name = obj.name;
-        const thumb = obj.thumb;
-        const type = obj.suffix;
-        const dur = formatTime(obj.duration);
-        const size = formatFileSize(obj.size);
-        const resolve = obj.resolve;
-        const createdate = obj.createdate;
-        const url = obj.url;
-
-        str += "<tr>";
-        str += "<td>"+ id + "</td>";
-        str += "<td>"+ name + "</td>";
-        str += "<td><img src=\""+ thumb + "\" alt='暂无' width='80' height='45'/></td>";
-        str += "<td>"+ type + "</td>";
-        str += "<td>"+ dur + "</td>";
-        str += "<td>"+ size + "</td>";
-        str += "<td>"+ resolve + "</td>";
-        str += "<td>"+ createdate + "</td>";
-        str += "<td>";
-        str += "<button onclick='openUrl(\""+url+"\")'>预览</button>";
-        str += "<button onclick='download2(\""+url+"\", \""+name+"\", \""+type+"\")'>下载</button>";
-        // str += "<button onclick='download("+id+")'>下载</button>";
-        str += "<button onclick='deleteFile("+id+")'>删除</button>";
-        str += "</td>";
-        str += "</tr>";
-    }
-    tBody.innerHTML = str;
-}
-
-/**
- * 将数据显示到table， 仅读，按照表头顺序
- * @param start 开始索引
- * @param end 结束索引
- */
-function showData2(start, end){
-    let str = "";
-    for(let i=start; i<end; i++){
-        const obj = tempList[i];
-        const id = obj.id;
-
-        if(i%2===0){
-            //单行
-            str += "<tr class='tr_single'>";
-        }else{
-            //双行
-            str += "<tr class='tr_double'>";
-        }
-
-        if(checkBoxAll.checked){
-            str += "<td><input type='checkbox' value='"+ id +"' checked='checked' onchange='upadteChooseData(this)'/></td>";//要求有id栏（主键）
-        }else{
-            str += "<td><input type='checkbox' value='"+ id +"' onchange='upadteChooseData(this)'/></td>";//要求有id栏（主键）
-        }
-        headMap.forEach(function (value, key) {
-            str += "<td>"+ obj[key]+ "</td>";
-        });
-        str += "<td>";
-        // str += "<button onclick='openUrl(\""+url+"\")'>预览</button>";
-        // str += "<button onclick='download2(\""+url+"\", \""+name+"\", \""+type+"\")'>下载</button>";
-        str += "<button onclick='deleteData("+id+")'>删除</button>";
-        str += "</td>";
-        str += "</tr>";
-    }
-    tBody.innerHTML = str;
-}
-
-/**
  * 上一页
  */
 function lastPage() {
@@ -406,7 +463,7 @@ function lastPage() {
         setCurPage();
         loadCurPage();
     }else{
-        layer.msg("当前为第一页！")
+        layer.msg(TEXT_NOTCIE_FIRST);
     }
 }
 
@@ -419,7 +476,7 @@ function nextPage() {
         setCurPage();
         loadCurPage();
     }else{
-        layer.msg("当前为最后一页！")
+        layer.msg(TEXT_NOTCIE_END);
     }
 }
 
@@ -427,7 +484,7 @@ function nextPage() {
  * 设置当前页数
  */
 function setCurPage() {
-    spanCur.innerText = curpage;
+    document.getElementById(ID_SPAN_CUR_PAGE).innerText = String(curpage);
 }
 
 /**
@@ -442,14 +499,39 @@ function setPageNum() {
             //向上取整
             allpage = Math.ceil(size/maxLine);
         }
-        spanAll.innerText = allpage;
+        document.getElementById(ID_SPAN_ALL_PAGE).innerText = String(allpage);
     }
 }
 
-//全选、非全选更新状态
-function upadteChooseDataAll() {
+/**
+ * 设置显示的数据内容
+ */
+function setTableDate(html) {
+    document.getElementById(ID_TABLE_BODY).innerHTML = html;
+}
+
+/**
+ * 设置全选复选框为未选择状态
+ */
+function setCheckBoxALLFalse() {
+    document.getElementById(ID_CHECK_BOX_ALL).checked = false;
+}
+
+/**
+ * 获取全选复选框当前状态
+ * @returns {(function(*): boolean|boolean)|boolean|(function(*): boolean|boolean)|(function(*): boolean|boolean)}
+ */
+function getCheckBoxALLState() {
+    return document.getElementById(ID_CHECK_BOX_ALL).checked
+}
+
+/**
+ * 全选、非全选更新选择列表
+ * @param checked
+ */
+function upadteChooseDataAll(checked) {
     selecList = [];
-    if(checkBoxAll.checked){
+    if(checked){
         tempList.forEach(function (value, index) {
             selecList.push(tempList[index].id);
         });
@@ -472,7 +554,7 @@ function upadteChooseData(checkbox) {
             selecList.push(id);
         }
     }else{
-        checkBoxAll.checked = false;
+        setCheckBoxALLFalse();
         if(index!==-1){
             //存在则删除
             selecList.splice(index, 1);
@@ -480,23 +562,12 @@ function upadteChooseData(checkbox) {
     }
 }
 
-function deleteData(id) {
-    if(tempList!=null){
-        tempList.forEach(function (value) {
-            if(value.id===id){
-                //找到了
-                console.log("delete: " + id);
-                return true;
-            }
-        })
-    }
-}
-
-function returnSelectData() {
-    console.log("return: " + selecList.toString())
-}
-
-//自定义 indexof
+////////////////////////////////////自定义///////////////////////////////////////////////
+/**
+ * 判断元素是否存在在数组内
+ * @param ele
+ * @returns {number} 元素索引； -1：不存在
+ */
 Array.prototype.existInArray = function (ele) {
     let out = -1;
     if(this.length<1){
@@ -505,7 +576,6 @@ Array.prototype.existInArray = function (ele) {
 
     this.forEach(function (value, index) {
         if(value===ele){
-            console.log("找到了： " + index);
             out = index;
             return true;
         }
