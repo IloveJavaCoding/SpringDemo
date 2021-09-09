@@ -34,7 +34,6 @@
             // table = new iTable();
             // root.appendChild(table.createTable(head));
             // table.showButton(false);
-
             getAllUsers();
         }
 

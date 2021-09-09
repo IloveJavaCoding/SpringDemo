@@ -38,7 +38,22 @@
                 title:'表格',
                 content:'home/itable',
                 area:['800px','500px'],
-                anim:6
+                anim:6,
+                //关闭弹框回调
+                cancel:function (index, layero) {
+                    //得到iframe页的窗口对象
+                    setCallBack(layero.find("iframe")[0].contentWindow.returnSelectData());
+                }
+            });
+        }
+
+        function showWebSocket() {
+            layer.open({
+                type:2,
+                title:'Web Socket 客户端',
+                content:'home/websocket',
+                area:['600px','500px'],
+                anim:3
             });
         }
 
@@ -59,6 +74,10 @@
                 shade: [0.5, 'gray'],
                 time:3000
             });
+        }
+
+        function setCallBack(msg) {
+            document.getElementById("div_meaasge").innerText = msg;
         }
     </script>
     <script type="text/javascript" src="/SpringDemo/static/js/common/commonjs.js"></script>
@@ -86,7 +105,7 @@
         <img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
 
     <div>
-        <a href="http://www.baidu.com/" target="home_frame"><span>百度</span></a> |
+        <a href="https://www.qweather.com/" target="home_frame"><span>天气</span></a> |
         <a href="https://www.runoob.com/" target="home_frame"><span>菜鸟</span></a> |
         <a href="https://huaban.com/" target="home_frame"><span>花瓣</span></a> |
     </div>
@@ -100,8 +119,13 @@
 
     <div id="layer_test">
         <button onclick="showTable()">显示表格</button>
+        <button onclick="showWebSocket()">Web Socket</button>
         <button onclick="showMsg()">提示消息</button>
         <button onclick="showLoad()">加载</button>
+    </div>
+
+    <div id="div_meaasge">
+
     </div>
 </div>
 

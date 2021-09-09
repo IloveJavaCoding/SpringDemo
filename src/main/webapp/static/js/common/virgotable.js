@@ -190,6 +190,7 @@ function deleteData(id) {
 
 function returnSelectData() {
     console.log("return: " + selecList.toString())
+    return selecList.toString();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -350,8 +351,17 @@ function initButton() {
     confirm.innerText = TEXT_CONFIRM;
     confirm.addEventListener(LISTENER_TYPE_CLICK, function () {
         returnSelectData();
+        closeLayer();
     })
     return confirm;
+}
+
+/**
+ * 关闭layer 弹框，如果存在(在弹框内调用)
+ */
+function closeLayer() {
+    let index=parent.layer.getFrameIndex(window.name);
+    parent.layer.close(index);
 }
 
 /**
