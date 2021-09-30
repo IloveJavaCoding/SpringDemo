@@ -35,6 +35,10 @@ public class TextUtil {
         return str == null || ("").equals(str);
     }
 
+    public static boolean isEqual(String str, String str2){
+        return str.equals(str2);
+    }
+
     /**
      * 用某字符连接多个字符串
      * @param separate

@@ -21,11 +21,11 @@
     <link href="/SpringDemo/static/res/icon/icon_logo.ico" rel="shortcut icon"/>
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/common/commonstyle.css"/>
     <link rel="stylesheet" type="text/css" href="/SpringDemo/static/css/page/homepage.css"/>
+
     <!--支持jquery-->
     <%--    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>--%>
-    <script src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
-    <script src="/SpringDemo/static/js/layer/layer.js"></script>
-    <script type="text/javascript" src="/SpringDemo/static/js/page/homepage.js"></script>
+    <script  type="text/javascript" src="/SpringDemo/static/js/jquery3.5.1/jquery-3.5.1.min.js"></script>
+    <script  type="text/javascript" src="/SpringDemo/static/js/layer/layer.js"></script>
 
     <script type="text/javascript">
         function getLoginUser() {
@@ -44,6 +44,17 @@
                     //得到iframe页的窗口对象
                     setCallBack(layero.find("iframe")[0].contentWindow.returnSelectData());
                 }
+            });
+        }
+
+        function showGridTable() {
+            layer.open({
+                type:2,
+                title:'Grid 表格',
+                // content:['home/gridtable','no'],
+                content:'home/gridtable',
+                area:['900px','500px'],
+                anim:1,
             });
         }
 
@@ -79,8 +90,33 @@
         function setCallBack(msg) {
             document.getElementById("div_meaasge").innerText = msg;
         }
+
+        function resize(obj){
+            var idoc = obj.contentWindow.document;
+            var img = idoc.getElementsByTagName('img')[0];
+            var frame = $('#home_frame');
+            if(img){
+                var curWidth  = img.width;
+                var curHeight = img.height;
+                var maxWidth = frame.width();
+                if (curWidth >= maxWidth){
+                    img.width = maxWidth;
+                    var zoomTimes=curWidth/maxWidth;
+                    img.height = curHeight/zoomTimes;
+                }
+            }
+            // var iframe=obj.contentWindow.document.body;
+            // var bHeight = iframe.scrollHeight;
+            // var dWidth = iframe.scrollWidth;
+            // bHeight= Math.max(bHeight,200);
+            // dWidth= Math.max(dWidth,1000);
+            // frame.style.height=(bHeight+20+"px");
+            // frame.style.width=(dWidth+10+"px");
+        }
+
     </script>
     <script type="text/javascript" src="/SpringDemo/static/js/common/commonjs.js"></script>
+    <script type="text/javascript" src="/SpringDemo/static/js/page/homepage.js"></script>
 </head>
 <body onload="onLoad()">
 <div id="header" class="header">
@@ -103,7 +139,6 @@
 <div id="main" class="main">
     <a id="go_top" href="#main" class="back_top_icon">
         <img src="/SpringDemo/static/res/icon/icon_end.png" width="32" height="32"/></a>
-
     <div>
         <a href="https://www.qweather.com/" target="home_frame"><span>天气</span></a> |
         <a href="https://www.runoob.com/" target="home_frame"><span>菜鸟</span></a> |
@@ -111,21 +146,27 @@
     </div>
     <br/>
 
-    <div class="div_frame">
-        <!--src: 默认加载页-->
-        <iframe id="home_frame" name="home_frame" class="home_frame"
-                src="/SpringDemo/home/itable" width="100%" height="100%"></iframe>
-    </div>
-
     <div id="layer_test">
         <button onclick="showTable()">显示表格</button>
+        <br/>
+        <button onclick="showGridTable()">显示Grid表格</button>
+        <br/>
         <button onclick="showWebSocket()">Web Socket</button>
+        <br/>
         <button onclick="showMsg()">提示消息</button>
+        <br/>
         <button onclick="showLoad()">加载</button>
     </div>
 
     <div id="div_meaasge">
 
+    </div>
+
+    <div class="div_frame">
+        <!--src: 默认加载页-->
+        <iframe id="home_frame" name="home_frame" class="home_frame"
+                src="/SpringDemo/static/res/img/img1.jpg" width="100%" height="100%"
+                onload="resize(this)" onresize="resize(this)" scrolling="no"></iframe>
     </div>
 </div>
 

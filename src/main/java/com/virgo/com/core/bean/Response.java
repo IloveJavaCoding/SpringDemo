@@ -17,7 +17,6 @@ public class Response {
     public static final String CODE_SUCCESS = "SUCCESS";
 
     //error type
-
     private static JSONObject toJson(String  code, String msg, Object data){
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(KEY_CODE, code);
@@ -29,7 +28,6 @@ public class Response {
         LogUtil.debug(jsonObject.toString());
         return jsonObject;
     }
-
 
     public static JSONObject success(String msg) {
         return toJson(CODE_SUCCESS, msg, null);

@@ -24,6 +24,11 @@ public class HomeController extends PcBaseControllerr {
         return new ModelAndView("home/itable");
     }
 
+    @RequestMapping("/gridtable")
+    public ModelAndView showgridTable(){
+        return new ModelAndView("home/gridtable");
+    }
+
     @RequestMapping("/websocket")
     public ModelAndView showWebSocket(){
         return new ModelAndView("home/websocket");

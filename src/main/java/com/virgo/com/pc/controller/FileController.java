@@ -1,9 +1,12 @@
 package com.virgo.com.pc.controller;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.virgo.com.core.bean.GridResponse;
 import com.virgo.com.core.bean.Response;
+import com.virgo.com.core.data.Constants;
 import com.virgo.com.core.util.FileUploadUtil;
 import com.virgo.com.core.util.LogUtil;
+import com.virgo.com.core.util.TextUtil;
 import com.virgo.com.pc.bean.PcBaseControllerr;
 import com.virgo.com.pc.entity.Miniofile;
 import com.virgo.com.pc.service.IFileService;
@@ -88,7 +91,7 @@ public class FileController extends PcBaseControllerr {
             wrapper.eq("type", type);
         }
 
-        int allPage = fileService.allPageNum(wrapper);
+        int allPage = fileService.allPageNum(Constants.PAGE_MAX_NUM, wrapper);
         System.out.println("总页数：" + allPage);
         JSONObject object;
         if(page<=allPage){
@@ -101,6 +104,22 @@ public class FileController extends PcBaseControllerr {
             }
         }else{
             object = Response.fail("页数超出！");
+        }
+
+        sendJsonResponse(response, object);
+    }
+
+    @RequestMapping("/all_file")
+    public void loadAllFile(HttpServletResponse response){
+        int allPage = fileService.allPageNum(Constants.PAGE_MAX_NUM);
+        System.out.println("总页数：" + allPage);
+        JSONObject object;
+        List<Miniofile> files = fileService.selectAll();
+        if(files==null || files.isEmpty()){
+            object = Response.fail("查询数据失败！");
+        }else{
+            JSONArray array = JSONArray.fromObject(files);
+            object = Response.success(String.valueOf(allPage), array);
         }
 
         sendJsonResponse(response, object);
@@ -154,5 +173,53 @@ public class FileController extends PcBaseControllerr {
         }
 
         sendJsonResponse(response, object);
+    }
+
+    /////////////////////////////////////////////grid table//////////////////////////////////////////////
+    @RequestMapping("/page_data")
+    public void loadPageData(HttpServletRequest request, HttpServletResponse response){
+        String p = request.getParameter("page");
+        String num = request.getParameter("rows");
+        String sort = request.getParameter("sidx");//排序
+        String order = request.getParameter("sord");//asc 升序 desc 降序
+
+        String filter = request.getParameter("_search");
+        String search = request.getParameter("search");
+
+        LogUtil.debug(TAG, "page: " + p + ", rownum " + num + ", sort: " + sort
+                + ", order " + order + ", filter " + filter + ", search " + search);
+        int page = Integer.parseInt(p);
+        int rnum = Integer.parseInt(num);
+
+        int allRecords = fileService.allRecordsNum();
+        GridResponse res = new GridResponse();
+        int allPage = allRecords% rnum==0?allRecords/rnum:allRecords/rnum + 1;
+        res.setPage(page);
+        res.setTotal(allPage);
+        res.setRecords(allRecords);
+
+        System.out.println("总行数：" + allRecords + " 总页数：" + allPage);
+        if(page<=allPage){
+            List<Miniofile> files;
+            if(TextUtil.isEmpty(sort)){
+                //无排序
+                files = fileService.selectByPage(page, rnum);
+            }else{
+                files = fileService.selectByPage(page, rnum, sort, order);
+            }
+
+            if(files==null || files.isEmpty()){
+                res.fail("查询数据失败！");
+            }else{
+//                JSONArray array = JSONArray.fromObject(files);
+//                res.setData(array);
+
+                res.setData2(files);
+            }
+        }else{
+            res.fail("页数超出！");
+        }
+
+        sendJsonResponse(response, res.toJson());
     }
 }

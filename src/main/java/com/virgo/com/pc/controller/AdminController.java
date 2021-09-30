@@ -1,6 +1,7 @@
 package com.virgo.com.pc.controller;
 
 import com.virgo.com.core.bean.Response;
+import com.virgo.com.core.data.Constants;
 import com.virgo.com.core.util.LogUtil;
 import com.virgo.com.pc.bean.PcBaseControllerr;
 import com.virgo.com.pc.entity.Account;
@@ -52,7 +53,7 @@ public class AdminController extends PcBaseControllerr {
         LogUtil.debug(TAG, "page: " + p);
         //每页10条
         int page = Integer.parseInt(p);
-        int allPage = userService.allPageNum();
+        int allPage = userService.allPageNum(Constants.PAGE_MAX_NUM);
         System.out.println("总页数：" + allPage);
         JSONObject object;
         if(page<=allPage){

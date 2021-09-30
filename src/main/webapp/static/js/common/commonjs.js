@@ -25,11 +25,13 @@ function onLoad(){
 //监听页面滚动控制返回顶部按钮显隐
 window.addEventListener('scroll',function(){
     var go_top = document.getElementById("go_top");
-    var st = document.documentElement.scrollTop + document.body.scrollTop; //获取滚动后的高度
-    if(st > 900){
-        go_top.style.visibility="visible";
-    }else{
-        go_top.style.visibility="hidden";
+    if(go_top!=null){
+        var st = document.documentElement.scrollTop + document.body.scrollTop; //获取滚动后的高度
+        if(st > 900){
+            go_top.style.visibility="visible";
+        }else{
+            go_top.style.visibility="hidden";
+        }
     }
 });
 
@@ -70,9 +72,9 @@ function formatTime(time) {
     }else if(time>=M){
         m = Math.floor(time/M);
         s = time - m*M;
-        return "00:"+formatHMS(m)+":"+formatHMS(s);
+        return formatHMS(m)+":"+formatHMS(s);
     }else{
-        return "00:00:"+formatHMS(time);
+        return "00:"+formatHMS(time);
     }
 }
 

@@ -388,7 +388,7 @@ function loadCurPageFilter(filter) {
 * 加载当前应显示的数据
 */
 function loadCurPage() {
-    if(tempList!=null) {
+    if(tempList!=null && tempList.length>0) {
         const size = tempList.length;
         const startIndex = (curpage - 1) * maxLine;
         let endIndex = curpage * maxLine;
@@ -398,6 +398,9 @@ function loadCurPage() {
         if(size>startIndex){
             showDataCommon(startIndex, endIndex);
         }
+    }else{
+        //无数据，清空
+        setTableDate("");
     }
 }
 
