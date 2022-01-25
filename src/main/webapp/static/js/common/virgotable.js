@@ -438,6 +438,7 @@ function sortVar(a, b) {
     if(isnumber){
         return a-b;
     }else{
+        // return parseInt(a)-parseInt(b);
         if(a===b){
             return 0;
         }else if(a>b){

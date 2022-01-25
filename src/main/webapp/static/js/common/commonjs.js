@@ -41,7 +41,7 @@ window.addEventListener('scroll',function(){
  */
 function formatFileSize(size) {
     var mb = 1024*1024;//MB
-    var kb = 1024;//KB
+    const kb = 1024;//KB
     if(size>=mb){
         var m = size/mb;
         return m.toFixed(2) + " MB";
